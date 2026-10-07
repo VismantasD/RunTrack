@@ -248,8 +248,8 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
         <span>Finišavo <b id="stFinished">0</b> iš <b id="stTotal">0</b></span>
         <span id="stPlan"></span>
         <span class="order" role="group" aria-label="Mygtukų tvarka">
-          <button id="orderDue" aria-pressed="true" title="Pirmiausia rodomi bėgikai, kurie turėtų greičiausiai kirsti liniją">Pagal atbėgimą</button>
-          <button id="orderBib" aria-pressed="false" title="Pastovi tvarka pagal bėgiko numerį">Pagal numerį</button>
+          <button id="orderBib" aria-pressed="true" title="Pastovi tvarka pagal bėgiko numerį">Pagal numerį</button>
+          <button id="orderDue" aria-pressed="false" title="Pirmiausia rodomi bėgikai, kurie turėtų greičiausiai kirsti liniją">Pagal atbėgimą</button>
         </span>
         <button class="btn danger small" id="resetBtn">Iš naujo</button>
       </div>
@@ -295,13 +295,23 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
 
   // ---------- State ----------
   // taps: [{ b: bib, t: ms since start }], always kept sorted by t.
-  const blank = () => ({ distance: 2000, lap: 400, guard: 10, bibsText: '1-40', runners: [], start: null, taps: [], view: 'setup', order: 'due' });
+  // Bump DEFAULTS when the defaults below change, so settings saved on a phone earlier pick them up once.
+  const DEFAULTS = 2;
+  const blank = () => ({ distance: 3000, lap: 400, guard: 10, bibsText: '1-40', runners: [], start: null, taps: [], view: 'setup', order: 'bib', defaults: DEFAULTS });
   let S = load();
 
   function load() {
     try {
       const raw = localStorage.getItem(KEY);
-      if (raw) return Object.assign(blank(), JSON.parse(raw));
+      if (raw) {
+        const saved = JSON.parse(raw);
+        // Older saved settings move to the current defaults, unless a race is under way.
+        if (saved.defaults !== DEFAULTS && saved.start == null) {
+          const d = blank();
+          Object.assign(saved, { distance: d.distance, lap: d.lap, order: d.order, defaults: DEFAULTS });
+        }
+        return Object.assign(blank(), saved);
+      }
     } catch (e) {}
     return blank();
   }
