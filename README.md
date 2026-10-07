@@ -11,6 +11,12 @@ Open `index.html` in a phone browser (no install, no server, works offline once 
 
 Details:
 
+- **Due next ordering.** Buttons are sorted by when each runner should next reach the line
+  (last crossing + their latest lap time), so the runners about to arrive are at the top-left.
+  Runners not yet seen stay at the top, so a missed runner doesn't get buried.
+  While you're tapping a pack, the buttons don't move: tapped runners fade in place, and the grid
+  re-sorts after 2.5 s without taps. Switch to **By number** for a fixed order.
+- Compact buttons: 40 runners fit on one phone screen. Finished runners move to a strip below.
 - Fractional lap counts are handled: 3000 m on a 400 m track is 7.5 laps, so the start is 200 m back
   and each runner crosses the line 8 times.
 - A second tap on the same runner within 10 s (configurable) is ignored, with an option to count it anyway.

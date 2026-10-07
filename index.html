@@ -107,36 +107,51 @@ h2 { font-size: 1.6rem; }
   font-variant-numeric: tabular-nums; letter-spacing: .01em; margin-right: auto;
 }
 .clock.stopped { color: var(--done); }
-.status { font-size: .95rem; color: var(--muted); width: 100%; display: flex; gap: 14px; flex-wrap: wrap; }
+.status { font-size: .95rem; color: var(--muted); width: 100%; display: flex; gap: 6px 14px; flex-wrap: wrap; align-items: center; }
 .status b { color: var(--ink); font-variant-numeric: tabular-nums; }
 
-/* Bib grid */
+/* Bib grid: compact so ~40 runners fit one phone screen (5 columns x 8 rows at 400px). */
+.order { display: flex; gap: 0; margin-left: auto; border: 2px solid var(--line); border-radius: 8px; overflow: hidden; }
+.order button { border: 0; background: var(--surface); padding: 4px 10px; font-size: .85rem; font-weight: 600; color: var(--muted); }
+.order button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
 .grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px;
-  padding-block: 14px; user-select: none; -webkit-user-select: none;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 6px;
+  padding-block: 12px; user-select: none; -webkit-user-select: none;
 }
 .bib {
-  position: relative; display: grid; gap: 2px; align-content: start; justify-items: start; text-align: left;
-  background: var(--surface); border: 3px solid var(--line); border-radius: 12px;
-  padding: 8px 10px 10px; min-height: 104px; -webkit-tap-highlight-color: transparent;
+  position: relative; display: grid; align-content: space-between; gap: 6px; text-align: left;
+  background: var(--surface); border: 2px solid var(--line); border-radius: 10px;
+  padding: 6px 7px 7px; min-height: 64px; -webkit-tap-highlight-color: transparent;
 }
-.bib .n { font-family: var(--display); font-weight: 700; font-size: 2.6rem; line-height: 1; font-variant-numeric: tabular-nums; }
-.bib .m { font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.25; }
-.bib .m b { color: var(--ink); font-weight: 600; }
-.pips { display: flex; gap: 2px; width: 100%; margin-top: 6px; }
-.pips i { flex: 1; height: 6px; border-radius: 2px; background: var(--line); }
+.bib .n { font-family: var(--display); font-weight: 700; font-size: 1.85rem; line-height: .95; font-variant-numeric: tabular-nums; }
+.bib .foot { display: flex; align-items: center; gap: 5px; }
+.bib .left { font-family: var(--display); font-weight: 700; font-size: .95rem; line-height: 1; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pips { display: flex; gap: 2px; width: 100%; }
+.pips i { flex: 1; height: 5px; border-radius: 2px; background: var(--line); }
 .pips i.on { background: var(--track); }
 .bib.bell { border-color: var(--track); }
-.bib.bell .tag { position: absolute; top: 8px; right: 8px; font-family: var(--display); font-weight: 700; font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--track); }
+.bib.bell .left { color: var(--track); }
 .bib.done { background: var(--done-soft); border-color: var(--done); }
-.bib.done .n { color: var(--done); }
+.bib.done .n, .bib.done .left { color: var(--done); }
 .bib.done .pips i.on { background: var(--done); }
-.bib.done .tag { position: absolute; top: 8px; right: 8px; font-family: var(--display); font-weight: 700; font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--done); }
-.bib:active { transform: scale(.97); }
+/* Tapped since the last re-sort: stays in place but fades back, since it is now a lap away. */
+.bib.just { opacity: .42; border-style: dashed; }
+.bib.just.done { opacity: .7; }
+.bib:active { transform: scale(.96); }
 .bib.flash { animation: flash .6s ease-out; }
-@keyframes flash { from { background: var(--track-soft); border-color: var(--track); } }
+@keyframes flash { from { background: var(--track-soft); border-color: var(--track); opacity: 1; } }
 .bib.done.flash { animation: flashdone .8s ease-out; }
-@keyframes flashdone { from { background: var(--surface); } }
+@keyframes flashdone { from { background: var(--surface); opacity: 1; } }
+
+.finished { display: grid; gap: 8px; padding-block: 4px 12px; }
+.finished h3 { margin: 0; font-family: var(--display); font-weight: 600; font-size: .85rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  display: inline-flex; gap: 6px; align-items: baseline; padding: 4px 9px; border-radius: 999px;
+  background: var(--done-soft); color: var(--done); font-variant-numeric: tabular-nums; font-size: .9rem;
+}
+.chip b { font-family: var(--display); font-weight: 700; font-size: 1.05rem; }
+.chip span { color: var(--ink); }
 
 .typein { display: flex; gap: 10px; padding-block: 6px 0; }
 .typein input { flex: 1; min-width: 0; background: var(--surface); border: 2px solid var(--line); border-radius: 10px; padding: 10px 12px; }
@@ -224,9 +239,17 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
       <div class="status">
         <span><b id="stFinished">0</b> of <b id="stTotal">0</b> finished</span>
         <span id="stPlan"></span>
+        <span class="order" role="group" aria-label="Button order">
+          <button id="orderDue" aria-pressed="true" title="Runners expected at the line soonest come first">Due next</button>
+          <button id="orderBib" aria-pressed="false" title="Fixed order by runner number">By number</button>
+        </span>
       </div>
     </div>
     <div class="grid" id="grid"></div>
+    <div class="finished" id="finished" hidden>
+      <h3 id="finishedTitle">Finished</h3>
+      <div class="chips" id="chips"></div>
+    </div>
     <form class="typein" id="typein" autocomplete="off">
       <input id="typeBib" placeholder="Or type a number and press Enter" inputmode="numeric" aria-label="Runner number">
       <button class="btn" type="submit">Record</button>
@@ -263,7 +286,7 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
 
   // ---------- State ----------
   // taps: [{ b: bib, t: ms since start }], always kept sorted by t.
-  const blank = () => ({ distance: 2000, lap: 400, guard: 10, bibsText: '1-12', runners: [], start: null, taps: [], view: 'setup' });
+  const blank = () => ({ distance: 2000, lap: 400, guard: 10, bibsText: '1-40', runners: [], start: null, taps: [], view: 'setup', order: 'due' });
   let S = load();
 
   function load() {
@@ -292,6 +315,59 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
     return { times, n: times.length, done, finish: done ? times[N - 1] : null, last: times.length ? times[times.length - 1] : null };
   }
   const allDone = () => S.runners.length > 0 && S.runners.every((b) => stats(b).done);
+
+  // ---------- Button order ----------
+  // "Due next" sorts runners by when they should next reach the line: last crossing plus their
+  // latest lap time (scaled up when that stretch was the short opening part-lap). Runners not yet
+  // seen at the line sort first, so anyone missed or overdue stays at the top until tapped.
+  // The order is frozen while taps are coming in and re-sorted after a quiet spell, so buttons
+  // never move under a finger in the middle of a pack.
+  const RESORT_AFTER = 2500;
+  let order = [];          // display order of the grid, changed only by resort()
+  const just = new Set();  // runners tapped since the last re-sort
+  let resortTimer;
+
+  function expectedNext(st) {
+    if (st.n === 0) return -1;
+    const seg = st.n === 1 ? markAt(1) : S.lap;
+    const prev = st.n > 1 ? st.times[st.n - 2] : 0;
+    return st.last + (st.last - prev) * (S.lap / seg);
+  }
+  function computeOrder() {
+    const active = S.runners.filter((b) => !stats(b).done);
+    if (S.order === 'bib') return active.sort(byBib);
+    return active.map((b) => ({ b, due: expectedNext(stats(b)) }))
+      .sort((x, y) => x.due - y.due || byBib(x.b, y.b))
+      .map((x) => x.b);
+  }
+  function resort(animate) {
+    clearTimeout(resortTimer);
+    just.clear();
+    const before = animate ? positions() : null;
+    order = computeOrder();
+    render();
+    if (before) slide(before);
+  }
+  function scheduleResort() {
+    clearTimeout(resortTimer);
+    resortTimer = setTimeout(() => resort(true), RESORT_AFTER);
+  }
+  function positions() {
+    const m = new Map();
+    document.querySelectorAll('#grid .bib').forEach((el) => m.set(el.dataset.bib, el.getBoundingClientRect()));
+    return m;
+  }
+  // Animate each button from its old spot to its new one so the re-sort is easy to follow.
+  function slide(before) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    document.querySelectorAll('#grid .bib').forEach((el) => {
+      const r0 = before.get(el.dataset.bib);
+      if (!r0) return;
+      const r1 = el.getBoundingClientRect();
+      const dx = r0.left - r1.left, dy = r0.top - r1.top;
+      if (dx || dy) el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], { duration: 380, easing: 'cubic-bezier(.2,.7,.2,1)' });
+    });
+  }
 
   function parseBibs(text) {
     const out = [], seen = new Set();
@@ -340,6 +416,8 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
     const tap = { b: bib, t: now };
     insertTap(tap);
     save();
+    just.add(bib);
+    scheduleResort();
     try { navigator.vibrate && navigator.vibrate(st.n + 1 === N ? [40, 60, 40] : 30); } catch (e) {}
     render();
     flash(bib);
@@ -352,8 +430,9 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
     if (i < 0) return;
     S.taps.splice(i, 1);
     save();
+    scheduleResort();
     render();
-    toast(`Removed #${tap.b}'s crossing at ${fmt(tap.t)}.`, 'Restore', () => { insertTap(tap); save(); render(); toast(`Restored #${tap.b}'s crossing at ${fmt(tap.t)}.`); });
+    toast(`Removed #${tap.b}'s crossing at ${fmt(tap.t)}.`, 'Restore', () => { insertTap(tap); save(); scheduleResort(); render(); toast(`Restored #${tap.b}'s crossing at ${fmt(tap.t)}.`); });
   }
 
   function flash(bib) {
@@ -422,25 +501,30 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
 
   function renderRace() {
     const N = crossingsNeeded();
-    let finished = 0;
-    $('#grid').innerHTML = S.runners.map((bib) => {
+    const done = S.runners.filter((b) => stats(b).done);
+    const finished = done.length;
+    // Frozen order, plus anyone it doesn't cover yet (added by typing, or un-finished by an undo).
+    const shown = order.filter((b) => S.runners.includes(b) && (!stats(b).done || just.has(b)));
+    for (const b of S.runners) if (!shown.includes(b) && !stats(b).done) shown.push(b);
+    $('#grid').innerHTML = shown.map((bib) => {
       const st = stats(bib);
-      if (st.done) finished++;
       const left = N - st.n;
       const cls = st.done ? 'done' : left === 1 && st.n > 0 ? 'bell' : '';
-      const tag = st.done ? '<span class="tag">Done</span>' : cls === 'bell' ? '<span class="tag">Last lap</span>' : '';
-      const meta = st.done
-        ? `<b>${fmt(st.finish)}</b>`
-        : st.n === 0
-          ? `${N} to go`
-          : `<b>${left}</b> to go · ${fmt(st.last)}`;
       const pips = Array.from({ length: N }, (_, i) => `<i class="${i < st.n ? 'on' : ''}"></i>`).join('');
-      return `<button class="bib ${cls}" data-bib="${esc(bib)}" aria-label="Runner ${esc(bib)}, ${st.done ? 'finished' : left + ' crossings to go'}">${tag}<span class="n">${esc(bib)}</span><span class="m">${meta}</span><span class="pips">${pips}</span></button>`;
+      const label = st.done ? 'finished' : left === 1 ? 'last lap' : `${left} crossings to go`;
+      return `<button class="bib ${cls}${just.has(bib) ? ' just' : ''}" data-bib="${esc(bib)}" aria-label="Runner ${esc(bib)}, ${label}">`
+        + `<span class="n">${esc(bib)}</span><span class="foot"><span class="pips">${pips}</span><span class="left">${st.done ? '✓' : left}</span></span></button>`;
     }).join('');
+    const chips = done.filter((b) => !just.has(b)).map((b) => ({ b, t: stats(b).finish })).sort((x, y) => x.t - y.t);
+    $('#finished').hidden = chips.length === 0;
+    $('#finishedTitle').textContent = `Finished · ${chips.length}`;
+    $('#chips').innerHTML = chips.map((c) => `<span class="chip"><b>${esc(c.b)}</b><span>${fmt(c.t)}</span></span>`).join('');
     $('#stFinished').textContent = finished;
     $('#stTotal').textContent = S.runners.length;
     $('#stPlan').textContent = `${S.distance} m · ${fmtLaps(lapsCount())} laps · ${N} crossings`;
     const last = S.taps.reduce((a, x) => (!a || x.t >= a.t ? x : a), null);
+    $('#orderDue').setAttribute('aria-pressed', S.order !== 'bib');
+    $('#orderBib').setAttribute('aria-pressed', S.order === 'bib');
     $('#undoBtn').disabled = !last;
     $('#undoBtn').textContent = last ? `Undo #${last.b}` : 'Undo';
   }
@@ -534,6 +618,8 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
     S.taps = [];
     S.start = Date.now();
     save();
+    just.clear();
+    order = computeOrder();
     keepAwake();
     show('race');
   });
@@ -557,6 +643,14 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
     const last = S.taps.reduce((a, x) => (!a || x.t >= a.t ? x : a), null);
     if (last) removeTap(last);
   });
+  function setOrder(mode) {
+    if (S.order === mode) return;
+    S.order = mode;
+    save();
+    resort(true);
+  }
+  $('#orderDue').addEventListener('click', () => setOrder('due'));
+  $('#orderBib').addEventListener('click', () => setOrder('bib'));
   $('#toResults').addEventListener('click', () => show('results'));
   $('#toRace').addEventListener('click', () => show('race'));
 
@@ -616,6 +710,7 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
   $('#guard').value = S.guard;
   if (S.start == null) S.view = 'setup';
   else if (S.view === 'setup') S.view = 'race';
+  order = computeOrder();
   keepAwake();
   show(S.view);
 })();
