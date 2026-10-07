@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>RunTrack Lap Timer</title>
+<meta name="theme-color" content="#c13f27">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RunTrack">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
@@ -674,6 +680,11 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
   // Downloads are blocked when the page runs inside an embedded viewer, so only offer it standalone.
   const embedded = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
   $('#downloadBtn').hidden = embedded;
+
+  // Cache the app so it reloads without signal (needs https, e.g. GitHub Pages, or localhost).
+  if ('serviceWorker' in navigator && window.isSecureContext && location.protocol.startsWith('http') && !embedded) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
   $('#downloadBtn').addEventListener('click', () => {
     const url = URL.createObjectURL(new Blob([csv()], { type: 'text/csv' }));
     const a = document.createElement('a');

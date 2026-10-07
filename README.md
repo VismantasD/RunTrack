@@ -23,3 +23,21 @@ Details:
 - **Undo** removes the most recent tap; **Remove last** in Results fixes a single runner.
 - Everything is saved in the browser as you go, so a reload or accidental tab close doesn't lose the race.
 - The screen is kept awake while timing, where the browser allows it.
+
+## Deploying to GitHub Pages
+
+`.github/workflows/pages.yml` publishes the app on every push to `main` or
+`claude/runner-lap-timer-awaf2m` (or manually from the Actions tab).
+
+One-time setup:
+
+1. Pages on a **private** repository needs a paid GitHub plan (Pro, Team or Enterprise).
+   On a free account, make the repository public instead (Settings → General → Danger Zone → Change visibility).
+   Either way, the published site itself is public.
+2. Settings → Pages → Build and deployment → Source: **GitHub Actions**.
+3. Actions → *Deploy to GitHub Pages* → **Run workflow** (or push a commit).
+
+The site appears at `https://<username>.github.io/RunTrack/`.
+
+Once opened, the app is cached for offline use, and can be added to the phone's home screen
+(Share → Add to Home Screen on iPhone, menu → Install app on Android).
