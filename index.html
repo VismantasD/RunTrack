@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="lt">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>RunTrack Lap Timer</title>
+<title>RunTrack ratų laikmatis</title>
 <meta name="theme-color" content="#c13f27">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="RunTrack">
@@ -78,6 +78,7 @@ h2 { font-size: 1.6rem; }
 .btn.danger { color: var(--track); }
 .btn.danger.armed { background: var(--track); border-color: var(--track); color: var(--track-ink); }
 .btn:disabled { opacity: .45; cursor: default; }
+.btn.small { min-height: 32px; padding: 3px 10px; font-size: .85rem; border-radius: 8px; }
 .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
 /* Setup */
@@ -90,7 +91,7 @@ h2 { font-size: 1.6rem; }
   padding: 10px 12px; font-variant-numeric: tabular-nums;
 }
 .field textarea { min-height: 96px; resize: vertical; font-family: var(--display); font-size: 1.25rem; font-weight: 600; letter-spacing: .02em; }
-.pair { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.pair { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: end; }
 .plan {
   background: var(--surface); border: 2px solid var(--line); border-radius: 12px; padding: 14px 16px;
   display: grid; gap: 10px;
@@ -107,9 +108,10 @@ h2 { font-size: 1.6rem; }
   background: var(--bg); padding-block: 10px; margin-inline: -16px; padding-inline: 16px;
   border-bottom: 2px solid var(--line);
 }
-.bar-inner { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.bar-inner { display: flex; align-items: center; gap: 8px; }
+.bar-inner .btn { padding: 8px 11px; white-space: nowrap; }
 .clock {
-  font-family: var(--display); font-weight: 700; font-size: clamp(2.6rem, 11vw, 3.6rem); line-height: 1;
+  font-family: var(--display); font-weight: 700; font-size: clamp(2.1rem, 9.5vw, 3.6rem); line-height: 1;
   font-variant-numeric: tabular-nums; letter-spacing: .01em; margin-right: auto;
 }
 .clock.stopped { color: var(--done); }
@@ -200,26 +202,26 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
   <section id="setup" class="setup col" hidden>
     <div>
       <div class="eyebrow">RunTrack</div>
-      <h1>Set up the race</h1>
+      <h1>Bėgimo nustatymai</h1>
     </div>
 
     <div class="field">
-      <label for="bibs">Runner numbers</label>
+      <label for="bibs">Bėgikų numeriai</label>
       <textarea id="bibs" spellcheck="false" autocomplete="off"></textarea>
-      <div class="hint">Separate with spaces or commas. Use a dash for a range, like <b>1-20</b>.</div>
+      <div class="hint">Atskirkite tarpais arba kableliais. Intervalui naudokite brūkšnelį, pvz., <b>1-40</b>.</div>
     </div>
 
     <div class="pair">
       <div class="field">
-        <label for="distance">Distance (m)</label>
+        <label for="distance">Distancija (m)</label>
         <input id="distance" type="number" inputmode="numeric" min="1" step="1">
       </div>
       <div class="field">
-        <label for="lap">Lap (m)</label>
+        <label for="lap">Ratas (m)</label>
         <input id="lap" type="number" inputmode="numeric" min="1" step="1">
       </div>
       <div class="field">
-        <label for="guard">Ignore repeat tap (s)</label>
+        <label for="guard">Ignoruoti pakartotinį paspaudimą (s)</label>
         <input id="guard" type="number" inputmode="numeric" min="0" step="1">
       </div>
     </div>
@@ -230,8 +232,8 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
       <div class="muted" id="planText"></div>
     </div>
 
-    <button class="btn primary start-btn" id="startBtn">Start clock</button>
-    <p class="muted" style="margin:0">Press Start on the gun. Then tap a runner's number every time they cross the finish line. Their last crossing is their finish time.</p>
+    <button class="btn primary start-btn" id="startBtn">Paleisti laikmatį</button>
+    <p class="muted" style="margin:0">Paspauskite „Paleisti laikmatį“ su starto signalu. Tada lieskite bėgiko numerį kiekvieną kartą, kai bėgikas kerta finišo liniją. Paskutinis kirtimas – finišo laikas.</p>
   </section>
 
   <!-- RACE -->
@@ -239,26 +241,27 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
     <div class="bar">
       <div class="bar-inner">
         <div class="clock" id="clock">0:00.0</div>
-        <button class="btn" id="undoBtn" disabled>Undo</button>
-        <button class="btn" id="toResults">Results</button>
+        <button class="btn" id="undoBtn" disabled>Atšaukti</button>
+        <button class="btn" id="toResults">Rezultatai</button>
       </div>
       <div class="status">
-        <span><b id="stFinished">0</b> of <b id="stTotal">0</b> finished</span>
+        <span>Finišavo <b id="stFinished">0</b> iš <b id="stTotal">0</b></span>
         <span id="stPlan"></span>
-        <span class="order" role="group" aria-label="Button order">
-          <button id="orderDue" aria-pressed="true" title="Runners expected at the line soonest come first">Due next</button>
-          <button id="orderBib" aria-pressed="false" title="Fixed order by runner number">By number</button>
+        <span class="order" role="group" aria-label="Mygtukų tvarka">
+          <button id="orderDue" aria-pressed="true" title="Pirmiausia rodomi bėgikai, kurie turėtų greičiausiai kirsti liniją">Pagal atbėgimą</button>
+          <button id="orderBib" aria-pressed="false" title="Pastovi tvarka pagal bėgiko numerį">Pagal numerį</button>
         </span>
+        <button class="btn danger small" id="resetBtn">Iš naujo</button>
       </div>
     </div>
     <div class="grid" id="grid"></div>
     <div class="finished" id="finished" hidden>
-      <h3 id="finishedTitle">Finished</h3>
+      <h3 id="finishedTitle">Finišavo</h3>
       <div class="chips" id="chips"></div>
     </div>
     <form class="typein" id="typein" autocomplete="off">
-      <input id="typeBib" placeholder="Or type a number and press Enter" inputmode="numeric" aria-label="Runner number">
-      <button class="btn" type="submit">Record</button>
+      <input id="typeBib" placeholder="Arba įveskite numerį ir spauskite Enter" inputmode="numeric" aria-label="Bėgiko numeris">
+      <button class="btn" type="submit">Įrašyti</button>
     </form>
   </section>
 
@@ -267,18 +270,18 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
     <div class="row">
       <div style="margin-right:auto">
         <div class="eyebrow" id="resEyebrow"></div>
-        <h2>Results</h2>
+        <h2>Rezultatai</h2>
       </div>
-      <button class="btn" id="toRace">Back to timing</button>
+      <button class="btn" id="toRace">Atgal į laiko matavimą</button>
     </div>
     <div class="tablewrap"><table id="resTable"></table></div>
-    <p class="muted" style="margin:0">Each split is the time for that stretch; the small figure under it is the race clock at that point. Use <b>Remove last</b> if a crossing was tapped by mistake.</p>
+    <p class="muted" style="margin:0">Stulpeliuose rodomas atkarpos laikas, o mažesnis skaičius po juo – bendras laikas tame taške. Jei kirtimas pažymėtas per klaidą, spauskite <b>Pašalinti paskutinį</b>.</p>
     <div class="row">
-      <button class="btn primary" id="copyBtn">Copy results</button>
-      <button class="btn" id="downloadBtn">Download CSV</button>
-      <button class="btn danger" id="newBtn" style="margin-left:auto">New race</button>
+      <button class="btn primary" id="copyBtn">Kopijuoti rezultatus</button>
+      <button class="btn" id="downloadBtn">Atsisiųsti CSV</button>
+      <button class="btn danger" id="newBtn" style="margin-left:auto">Naujas bėgimas</button>
     </div>
-    <textarea class="export" id="exportBox" readonly hidden aria-label="Results as CSV"></textarea>
+    <textarea class="export" id="exportBox" readonly hidden aria-label="Rezultatai tekstu"></textarea>
   </section>
 </div>
 
@@ -399,7 +402,19 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
     const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, ss = s % 60;
     return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(ss).padStart(2, '0') + '.' + d;
   }
-  const fmtLaps = (l) => (Number.isInteger(l) ? String(l) : l.toFixed(2).replace(/0$/, ''));
+  const fmtLaps = (l) => (Number.isInteger(l) ? String(l) : l.toFixed(2).replace(/0$/, '').replace('.', ','));
+
+  // Lithuanian plural forms: 1 bėgikas, 2 bėgikai, 10 bėgikų (21 bėgikas, 22 bėgikai, ...).
+  function plural(n, one, few, many) {
+    const m10 = n % 10, m100 = n % 100;
+    if (m10 === 1 && m100 !== 11) return one;
+    if (m10 >= 2 && (m100 < 10 || m100 >= 20)) return few;
+    return many;
+  }
+  const runnersWord = (n) => plural(n, 'bėgikas', 'bėgikai', 'bėgikų');
+  const crossingsWord = (n) => plural(n, 'kirtimas', 'kirtimai', 'kirtimų');
+  const lapsWord = (l) => (Number.isInteger(l) ? plural(l, 'ratas', 'ratai', 'ratų') : 'rato');
+  const lapsText = (l) => `${fmtLaps(l)} ${lapsWord(l)}`;
 
   // ---------- Recording ----------
   function insertTap(tap) {
@@ -413,10 +428,10 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
     const now = at != null ? at : elapsed();
     if (!S.runners.includes(bib)) { S.runners.push(bib); S.runners.sort(byBib); }
     const st = stats(bib), N = crossingsNeeded();
-    if (st.done) { toast(`#${bib} already finished in ${fmt(st.finish)}.`); return; }
+    if (st.done) { toast(`#${bib} jau finišavo: ${fmt(st.finish)}.`); return; }
     if (!force && st.last != null && now - st.last < S.guard * 1000) {
       const ago = Math.max(1, Math.round((now - st.last) / 1000));
-      toast(`#${bib} was recorded ${ago} s ago, so this tap was ignored.`, 'Count it', () => record(bib, true, now));
+      toast(`#${bib} pažymėtas prieš ${ago} s, todėl šis paspaudimas praleistas.`, 'Vis tiek įskaityti', () => record(bib, true, now));
       return;
     }
     const tap = { b: bib, t: now };
@@ -428,7 +443,7 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
     render();
     flash(bib);
     const k = stats(bib).n;
-    toast(k >= N ? `#${bib} finished in ${fmt(now)}` : `#${bib} · crossing ${k} of ${N} · ${fmt(now)}`, 'Undo', () => removeTap(tap));
+    toast(k >= N ? `#${bib} finišavo: ${fmt(now)}` : `#${bib} · kirtimas ${k}/${N} · ${fmt(now)}`, 'Atšaukti', () => removeTap(tap));
   }
 
   function removeTap(tap) {
@@ -438,7 +453,7 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
     save();
     scheduleResort();
     render();
-    toast(`Removed #${tap.b}'s crossing at ${fmt(tap.t)}.`, 'Restore', () => { insertTap(tap); save(); scheduleResort(); render(); toast(`Restored #${tap.b}'s crossing at ${fmt(tap.t)}.`); });
+    toast(`Pašalintas #${tap.b} kirtimas (${fmt(tap.t)}).`, 'Atkurti', () => { insertTap(tap); save(); scheduleResort(); render(); toast(`Atkurtas #${tap.b} kirtimas (${fmt(tap.t)}).`); });
   }
 
   function flash(bib) {
@@ -484,8 +499,8 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
     return {
       laps, N, first, offset,
       text: offset
-        ? `The start is ${S.lap - first} m before the finish line, so the first time they reach the line is after ${first} m. Each runner crosses the line ${N} times; the ${N}th crossing is the finish.`
-        : `The start is on the finish line. Each runner crosses the line ${N} times; the ${N}th crossing is the finish.`,
+        ? `Startas yra ${S.lap - first} m prieš finišo liniją, todėl pirmą kartą bėgikai ją pasiekia po ${first} m. Kiekvienas bėgikas kerta liniją ${N} ${plural(N, 'kartą', 'kartus', 'kartų')}; paskutinis kirtimas – finišas.`
+        : `Startas yra ant finišo linijos. Kiekvienas bėgikas kerta liniją ${N} ${plural(N, 'kartą', 'kartus', 'kartų')}; paskutinis kirtimas – finišas.`,
     };
   }
 
@@ -493,13 +508,13 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
     const bibs = parseBibs($('#bibs').value);
     const valid = S.distance > 0 && S.lap > 0;
     if (!valid) {
-      $('#planBig').textContent = 'Enter a distance and lap length';
+      $('#planBig').textContent = 'Įveskite distanciją ir rato ilgį';
       $('#planLine').innerHTML = ''; $('#planText').textContent = '';
       $('#startBtn').disabled = true;
       return;
     }
     const p = planCopy();
-    $('#planBig').textContent = `${bibs.length} runner${bibs.length === 1 ? '' : 's'} · ${fmtLaps(p.laps)} laps · ${p.N} crossings`;
+    $('#planBig').textContent = `${bibs.length} ${runnersWord(bibs.length)} · ${lapsText(p.laps)} · ${p.N} ${crossingsWord(p.N)}`;
     $('#planLine').innerHTML = Array.from({ length: Math.min(p.N, 60) }, (_, i) => `<span class="${i === 0 && p.offset ? 'part' : ''}"></span>`).join('');
     $('#planText').textContent = p.text;
     $('#startBtn').disabled = bibs.length === 0;
@@ -517,22 +532,22 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
       const left = N - st.n;
       const cls = st.done ? 'done' : left === 1 && st.n > 0 ? 'bell' : '';
       const pips = Array.from({ length: N }, (_, i) => `<i class="${i < st.n ? 'on' : ''}"></i>`).join('');
-      const label = st.done ? 'finished' : left === 1 ? 'last lap' : `${left} crossings to go`;
-      return `<button class="bib ${cls}${just.has(bib) ? ' just' : ''}" data-bib="${esc(bib)}" aria-label="Runner ${esc(bib)}, ${label}">`
+      const label = st.done ? 'finišavo' : left === 1 ? 'paskutinis ratas' : `liko ${left} ${crossingsWord(left)}`;
+      return `<button class="bib ${cls}${just.has(bib) ? ' just' : ''}" data-bib="${esc(bib)}" aria-label="Bėgikas ${esc(bib)}, ${label}">`
         + `<span class="n">${esc(bib)}</span><span class="foot"><span class="pips">${pips}</span><span class="left">${st.done ? '✓' : left}</span></span></button>`;
     }).join('');
     const chips = done.filter((b) => !just.has(b)).map((b) => ({ b, t: stats(b).finish })).sort((x, y) => x.t - y.t);
     $('#finished').hidden = chips.length === 0;
-    $('#finishedTitle').textContent = `Finished · ${chips.length}`;
+    $('#finishedTitle').textContent = `Finišavo · ${chips.length}`;
     $('#chips').innerHTML = chips.map((c) => `<span class="chip"><b>${esc(c.b)}</b><span>${fmt(c.t)}</span></span>`).join('');
     $('#stFinished').textContent = finished;
     $('#stTotal').textContent = S.runners.length;
-    $('#stPlan').textContent = `${S.distance} m · ${fmtLaps(lapsCount())} laps · ${N} crossings`;
+    $('#stPlan').textContent = `${S.distance} m · ${lapsText(lapsCount())} · ${N} ${crossingsWord(N)}`;
     const last = S.taps.reduce((a, x) => (!a || x.t >= a.t ? x : a), null);
     $('#orderDue').setAttribute('aria-pressed', S.order !== 'bib');
     $('#orderBib').setAttribute('aria-pressed', S.order === 'bib');
     $('#undoBtn').disabled = !last;
-    $('#undoBtn').textContent = last ? `Undo #${last.b}` : 'Undo';
+    $('#undoBtn').textContent = last ? `Atšaukti #${last.b}` : 'Atšaukti';
   }
 
   function rows() {
@@ -553,8 +568,8 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
     const N = crossingsNeeded();
     const list = rows();
     const marks = Array.from({ length: N }, (_, i) => markAt(i + 1));
-    $('#resEyebrow').textContent = `${S.distance} m · ${list.filter((r) => r.done).length} of ${list.length} finished`;
-    const head = `<thead><tr><th>Pos</th><th>No.</th><th>Time</th>${marks.map((m) => `<th>${m} m</th>`).join('')}<th></th></tr></thead>`;
+    $('#resEyebrow').textContent = `${S.distance} m · finišavo ${list.filter((r) => r.done).length} iš ${list.length}`;
+    const head = `<thead><tr><th>Vieta</th><th>Nr.</th><th>Laikas</th>${marks.map((m) => `<th>${m} m</th>`).join('')}<th></th></tr></thead>`;
     const body = list.map((r) => {
       const splits = marks.map((_, i) => {
         const t = r.times[i];
@@ -562,20 +577,23 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
         const prev = i ? r.times[i - 1] : 0;
         return `<td>${fmt(t - prev)}<small>${fmt(t)}</small></td>`;
       }).join('');
-      const time = r.done ? fmt(r.finish) : r.n ? `running · ${r.n}/${N}` : 'not started';
-      const act = r.n ? `<button class="linkbtn" data-remove="${esc(r.bib)}">Remove last</button>` : '';
+      const time = r.done ? fmt(r.finish) : r.n ? `bėga · ${r.n}/${N}` : 'dar nepažymėtas';
+      const act = r.n ? `<button class="linkbtn" data-remove="${esc(r.bib)}">Pašalinti paskutinį</button>` : '';
       return `<tr class="${r.done ? '' : 'running'}"><td class="pos">${r.pos ?? '–'}</td><td class="bibc">${esc(r.bib)}</td><td class="time">${time}</td>${splits}<td>${act}</td></tr>`;
     }).join('');
     $('#resTable').innerHTML = head + `<tbody>${body}</tbody>`;
   }
 
-  function csv() {
+  // Tab-separated for copying (pastes into spreadsheet cells in any locale);
+  // ';'-separated for the CSV file, which is what Excel expects with Lithuanian settings.
+  function table(sep) {
     const N = crossingsNeeded();
     const marks = Array.from({ length: N }, (_, i) => markAt(i + 1));
-    const lines = [['Position', 'Number', 'Finish time', 'Crossings', ...marks.map((m) => `${m} m`)].join(',')];
+    const cell = (v) => (String(v).includes(sep) || /["\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v);
+    const lines = [['Vieta', 'Numeris', 'Finišo laikas', 'Kirtimai', ...marks.map((m) => `${m} m`)].map(cell).join(sep)];
     for (const r of rows()) {
       lines.push([r.pos ?? '', r.bib, r.done ? fmt(r.finish) : '', r.n, ...marks.map((_, i) => (r.times[i] != null ? fmt(r.times[i]) : ''))]
-        .map((v) => (/[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v)).join(','));
+        .map(cell).join(sep));
     }
     return lines.join('\n');
   }
@@ -639,8 +657,8 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
     e.preventDefault();
     const v = $('#typeBib').value.trim();
     if (!v) return;
-    if (/\s/.test(v)) { toast('Type one runner number at a time.'); return; }
-    if (!S.runners.includes(v)) toast(`#${v} was not on the start list, so it has been added.`);
+    if (/\s/.test(v)) { toast('Įveskite po vieną numerį.'); return; }
+    if (!S.runners.includes(v)) toast(`#${v} nebuvo sąraše, todėl pridėtas.`);
     record(v);
     $('#typeBib').value = '';
   });
@@ -669,11 +687,11 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
   });
 
   $('#copyBtn').addEventListener('click', () => {
-    const text = csv();
+    const text = table('\t');
     const box = $('#exportBox');
-    const fallback = () => { box.value = text; box.hidden = false; box.focus(); box.select(); toast('Select all and copy the text below.'); };
+    const fallback = () => { box.value = text; box.hidden = false; box.focus(); box.select(); toast('Pažymėkite visą tekstą žemiau ir nukopijuokite.'); };
     try {
-      navigator.clipboard.writeText(text).then(() => toast('Results copied. Paste them into a spreadsheet or message.'), fallback);
+      navigator.clipboard.writeText(text).then(() => toast('Rezultatai nukopijuoti. Įklijuokite juos į skaičiuoklę arba žinutę.'), fallback);
     } catch (e) { fallback(); }
   });
 
@@ -686,33 +704,43 @@ textarea.export { width: 100%; min-height: 120px; background: var(--surface); bo
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
   $('#downloadBtn').addEventListener('click', () => {
-    const url = URL.createObjectURL(new Blob([csv()], { type: 'text/csv' }));
+    const url = URL.createObjectURL(new Blob(['\ufeff' + table(';')], { type: 'text/csv;charset=utf-8' }));
     const a = document.createElement('a');
     const d = new Date(S.start || Date.now());
     a.href = url;
-    a.download = `race-${S.distance}m-${d.toISOString().slice(0, 16).replace(/[T:]/g, '-')}.csv`;
+    a.download = `begimas-${S.distance}m-${d.toISOString().slice(0, 16).replace(/[T:]/g, '-')}.csv`;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   });
 
   // Two-step confirm: dialogs are not reliable everywhere this page may run.
-  let armTimer;
-  $('#newBtn').addEventListener('click', () => {
-    const b = $('#newBtn');
-    if (!b.classList.contains('armed')) {
-      b.classList.add('armed');
-      b.textContent = 'Tap again to clear all times';
-      clearTimeout(armTimer);
-      armTimer = setTimeout(() => { b.classList.remove('armed'); b.textContent = 'New race'; }, 4000);
-      return;
-    }
-    clearTimeout(armTimer);
-    b.classList.remove('armed'); b.textContent = 'New race';
+  function confirmButton(btn, armedLabel, action) {
+    const label = btn.textContent;
+    let timer;
+    const disarm = () => { clearTimeout(timer); btn.classList.remove('armed'); btn.textContent = label; };
+    btn.addEventListener('click', () => {
+      if (!btn.classList.contains('armed')) {
+        btn.classList.add('armed');
+        btn.textContent = armedLabel;
+        clearTimeout(timer);
+        timer = setTimeout(disarm, 4000);
+        return;
+      }
+      disarm();
+      action();
+    });
+  }
+  // Clears the clock and all times but keeps the runner list and distance for the next start.
+  function clearRace() {
     S.start = null; S.taps = []; S.runners = [];
+    just.clear(); clearTimeout(resortTimer);
     if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
     save();
     show('setup');
-  });
+    toast('Laikai ištrinti. Galite pradėti iš naujo.');
+  }
+  confirmButton($('#newBtn'), 'Spauskite dar kartą – laikai bus ištrinti', clearRace);
+  confirmButton($('#resetBtn'), 'Tikrai? Spauskite dar kartą', clearRace);
 
   // ---------- Boot ----------
   $('#bibs').value = S.bibsText;

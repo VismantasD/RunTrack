@@ -1,6 +1,6 @@
 # RunTrack
 
-A single-page lap timer for timing a group of runners by hand at the finish line.
+A single-page lap timer for timing a group of runners by hand at the finish line. The interface is in Lithuanian.
 
 Open `index.html` in a phone browser (no install, no server, works offline once loaded).
 
@@ -20,7 +20,11 @@ Details:
 - Fractional lap counts are handled: 3000 m on a 400 m track is 7.5 laps, so the start is 200 m back
   and each runner crosses the line 8 times.
 - A second tap on the same runner within 10 s (configurable) is ignored, with an option to count it anyway.
-- **Undo** removes the most recent tap; **Remove last** in Results fixes a single runner.
+- **Atšaukti** (undo) removes the most recent tap; **Pašalinti paskutinį** in Results fixes a single runner.
+- **Iš naujo** (reset) on the timing screen and **Naujas bėgimas** in Results clear all times after a second tap
+  to confirm; the runner list and distance are kept.
+- **Kopijuoti rezultatus** copies tab-separated text that pastes into spreadsheet cells; the downloaded CSV uses `;`
+  so it opens in columns in Excel with Lithuanian settings.
 - Everything is saved in the browser as you go, so a reload or accidental tab close doesn't lose the race.
 - The screen is kept awake while timing, where the browser allows it.
 
